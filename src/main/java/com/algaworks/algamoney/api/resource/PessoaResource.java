@@ -51,19 +51,16 @@ public class PessoaResource {
 
 	@GetMapping("/{id}")
 	public ResponseEntity<Pessoa> getById(@PathVariable Long id) {
-		Pessoa pessoa = pessoaRepository.findOne(id);
-		if (pessoa != null) {
-			return ResponseEntity.ok().body(pessoa);
-		} else {
-			return ResponseEntity.notFound().build();
-		}
+		//404 tratado no ExceptionHandler
+		Pessoa pessoa = service.findById(id);
+		return ResponseEntity.ok().body(pessoa);
 	}
 
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	public void delete(@PathVariable Long id) {
 		// se deletar uma pessoa que nao existe, dispara a excecao
-		// EmptyResultDataAccessException
+		// EmptyResultDataAccessException - 404
 		// tratada no exception Handler
 		pessoaRepository.delete(id);
 	}
