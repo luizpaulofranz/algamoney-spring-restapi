@@ -19,9 +19,10 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.algaworks.algamoney.api.service.exception.PessoaInvalidaException;
 
 @ControllerAdvice
 public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
@@ -37,7 +38,7 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 
 		// pegamos essa propriedade do arquivo resources/messages.properties
 		String message = messageSource.getMessage("mensagem.invalida", null, LocaleContextHolder.getLocale());
-		String log = ex.getCause() != null ? ex.getCause().toString(): ex.toString();
+		String log = ex.getCause() != null ? ex.getCause().toString() : ex.toString();
 		// criamos uma lista de erros apenas para padronizar a chamada
 		List<Erro> erros = Arrays.asList(new Erro(message, log));
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
@@ -52,12 +53,15 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 		List<Erro> erros = criarListaDeErros(ex.getBindingResult());
 		return handleExceptionInternal(ex, erros, headers, HttpStatus.BAD_REQUEST, request);
 	}
-	
-	@ExceptionHandler({ DataIntegrityViolationException.class } )
-	public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex, WebRequest request) {
-		
-		String mensagemUsuario = messageSource.getMessage("recurso.operacao-nao-permitida", null, LocaleContextHolder.getLocale());
-		//ExceptionUtils retorna a excecao raiz, retornando qual foi a violacao de integridade que ocorreu
+
+	@ExceptionHandler({ DataIntegrityViolationException.class })
+	public ResponseEntity<Object> handleDataIntegrityViolationException(DataIntegrityViolationException ex,
+			WebRequest request) {
+
+		String mensagemUsuario = messageSource.getMessage("recurso.operacao-nao-permitida", null,
+				LocaleContextHolder.getLocale());
+		// ExceptionUtils retorna a excecao raiz, retornando qual foi a violacao
+		// de integridade que ocorreu
 		String mensagemDesenvolvedor = ExceptionUtils.getRootCauseMessage(ex);
 		List<Erro> erros = Arrays.asList(new Erro(mensagemUsuario, mensagemDesenvolvedor));
 
@@ -65,12 +69,23 @@ public class AlgamoneyExceptionHandler extends ResponseEntityExceptionHandler {
 	}
 
 	// trata excecoes ao deletar um recurso inexistente, retorna um 404
-	@ExceptionHandler({EmptyResultDataAccessException.class})
-	protected ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex, WebRequest request){
+	@ExceptionHandler({ EmptyResultDataAccessException.class })
+	protected ResponseEntity<Object> handleEmptyResultDataAccessException(EmptyResultDataAccessException ex,
+			WebRequest request) {
 		String message = messageSource.getMessage("recurso.nao-encontrado", null, LocaleContextHolder.getLocale());
 		String log = ex.toString();
 		List<Erro> erros = Arrays.asList(new Erro(message, log));
 		return handleExceptionInternal(ex, erros, new HttpHeaders(), HttpStatus.NOT_FOUND, request);
+	}
+
+	//excecao nossa
+	@ExceptionHandler({ PessoaInvalidaException.class })
+	public ResponseEntity<Object> handlePessoaInvalidaException(PessoaInvalidaException ex) {
+		String message = messageSource.getMessage("pessoa.invalida", null,
+				LocaleContextHolder.getLocale());
+		String log = ex.toString();
+		List<Erro> erros = Arrays.asList(new Erro(message, log));
+		return ResponseEntity.badRequest().body(erros);
 	}
 
 	// BindingResult contem todos os erros
