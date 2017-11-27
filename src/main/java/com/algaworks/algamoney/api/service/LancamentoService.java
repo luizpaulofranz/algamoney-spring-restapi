@@ -10,6 +10,7 @@ import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.model.Pessoa;
 import com.algaworks.algamoney.api.repository.LancamentoRepository;
 import com.algaworks.algamoney.api.repository.PessoaRepository;
+import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
 import com.algaworks.algamoney.api.service.exception.PessoaInvalidaException;
 
 
@@ -22,9 +23,10 @@ public class LancamentoService {
 	@Autowired
 	private PessoaRepository pessoas;
 	
-	public List<Lancamento> findAll(){
-		return repository.findAll();
+	public List<Lancamento> list(LancamentoFilter filter){
+		return repository.filter(filter);
 	}
+	
 	
 	//save and update
 	public Lancamento save(Lancamento lancamento) {
