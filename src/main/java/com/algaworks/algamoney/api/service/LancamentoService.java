@@ -1,9 +1,9 @@
 package com.algaworks.algamoney.api.service;
 
-import java.util.List;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.algaworks.algamoney.api.model.Lancamento;
@@ -23,8 +23,9 @@ public class LancamentoService {
 	@Autowired
 	private PessoaRepository pessoas;
 	
-	public List<Lancamento> list(LancamentoFilter filter){
-		return repository.filter(filter);
+	/* Apply the filter */
+	public Page<Lancamento> list(LancamentoFilter filter, Pageable page){
+		return repository.filter(filter, page);
 	}
 	
 	
@@ -48,6 +49,11 @@ public class LancamentoService {
 			throw new EmptyResultDataAccessException(1);
 		}
 		return lancamento;
+	}
+	
+	public void delete(Long id){
+		Lancamento lancamento = findOne(id);
+		repository.delete(lancamento);
 	}
 	
 }
