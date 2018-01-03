@@ -27,8 +27,9 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 			.withClient("angular")
 			.secret("@ngul@r0")
 			.scopes("read", "write")//esse escopo pode conter qlq array de strings
-				.authorizedGrantTypes("password")//passwordflow do oauth
-				.accessTokenValiditySeconds(1800);//tempo de vida do token, 30 mins
+				.authorizedGrantTypes("password", "refresh_token")//passwordflow do oauth, sao os fluxos do protocolo oauth
+				.accessTokenValiditySeconds(120)//tempo de vida do token, 30 mins
+				.refreshTokenValiditySeconds(3600 * 24);//poremos dar refresh nesse token por ateh um dia
 	}
 
 	@Override
@@ -36,6 +37,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		endpoints
 			.tokenStore(tokenStore())
 			.accessTokenConverter(accessTokenConverter())
+			.reuseRefreshTokens(false)//quando da um refresh, um novo token eh criado
 			.authenticationManager(authenticationManager);
 	}
 
