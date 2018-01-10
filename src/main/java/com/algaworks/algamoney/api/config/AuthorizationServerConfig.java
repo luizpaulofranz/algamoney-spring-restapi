@@ -26,10 +26,20 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 		clients.inMemory()
 			.withClient("angular")
 			.secret("@ngul@r0")
-			.scopes("read", "write")//esse escopo pode conter qlq array de strings
-				.authorizedGrantTypes("password", "refresh_token")//passwordflow do oauth, sao os fluxos do protocolo oauth
-				.accessTokenValiditySeconds(120)//tempo de vida do token, 30 mins
-				.refreshTokenValiditySeconds(3600 * 24);//poremos dar refresh nesse token por ateh um dia
+			.scopes("read", "write")//esse escopo pode conter qlq array de strings, 
+			//eh usado para controle de nivel de acesso aos metodos
+			.authorizedGrantTypes("password", "refresh_token")//passwordflow do oauth, sao os fluxos do protocolo oauth
+			.accessTokenValiditySeconds(1800)//tempo de vida do token, 30 mins
+			.refreshTokenValiditySeconds(3600 * 24)//poremos dar refresh nesse token por ateh um dia
+		.and()
+			//outro aplicativo cliente, com escopo mais limitado
+			.withClient("mobile")
+			.secret("m0b1l30")
+			.scopes("read")//esse tem escopo apenas de leitura
+			.authorizedGrantTypes("password", "refresh_token")//passwordflow do oauth, sao os fluxos do protocolo oauth
+			.accessTokenValiditySeconds(1800)//tempo de vida do token, 30 mins
+			.refreshTokenValiditySeconds(3600 * 24);//poremos dar refresh nesse token por ateh um dia
+		
 	}
 
 	@Override

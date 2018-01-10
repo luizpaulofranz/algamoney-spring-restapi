@@ -1,7 +1,6 @@
 package com.algaworks.algamoney.api.resource;
 
 import java.net.URI;
-import java.util.List;
 
 import javax.validation.Valid;
 
@@ -10,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,17 +33,21 @@ public class LancamentoResource {
 	
 	@GetMapping
 	//para implementar a paginacao
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	//controle de nivel de acesso do usuario, primeiro as permissoes do usuario, depois do app cliente
 	public Page<Lancamento> listar(LancamentoFilter filter, Pageable page){
 		return this.service.list(filter, page);
 	}
 	
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public ResponseEntity<Lancamento> getById(@PathVariable Long id){
 		Lancamento lancamento = service.findOne(id);
 		return ResponseEntity.ok().body(lancamento);
 	}
 	
 	@PostMapping
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
 	public ResponseEntity<Lancamento> insert(@Valid @RequestBody Lancamento lancamento){
 		Lancamento saved = service.save(lancamento);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(saved.getId()).toUri();
@@ -53,6 +57,7 @@ public class LancamentoResource {
 	
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
+	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('write')")
 	public void delete(@PathVariable Long id) {
 		// EmptyResultDataAccessException - 404
 		// tratada no exception Handler
