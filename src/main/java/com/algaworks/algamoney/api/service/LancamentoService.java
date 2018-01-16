@@ -11,6 +11,7 @@ import com.algaworks.algamoney.api.model.Pessoa;
 import com.algaworks.algamoney.api.repository.LancamentoRepository;
 import com.algaworks.algamoney.api.repository.PessoaRepository;
 import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
+import com.algaworks.algamoney.api.repository.projection.ResumoLancamento;
 import com.algaworks.algamoney.api.service.exception.PessoaInvalidaException;
 
 
@@ -26,6 +27,11 @@ public class LancamentoService {
 	/* Apply the filter */
 	public Page<Lancamento> list(LancamentoFilter filter, Pageable page){
 		return repository.filter(filter, page);
+	}
+	
+	/* Lista os lancamentos e apresenta um JSON resumido */
+	public Page<ResumoLancamento> listResume(LancamentoFilter filter, Pageable page){
+		return repository.resumir(filter, page);
 	}
 	
 	

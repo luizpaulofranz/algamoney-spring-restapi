@@ -22,6 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
+import com.algaworks.algamoney.api.repository.projection.ResumoLancamento;
 import com.algaworks.algamoney.api.service.LancamentoService;
 
 @RestController
@@ -37,6 +38,14 @@ public class LancamentoResource {
 	//controle de nivel de acesso do usuario, primeiro as permissoes do usuario, depois do app cliente
 	public Page<Lancamento> listar(LancamentoFilter filter, Pageable page){
 		return this.service.list(filter, page);
+	}
+	
+	//se colocarmos na URL um ?resumo, esse sera o metodo chamado, e nao o de cima
+	//o nome disso eh PROJECTION, um mesmo endpoint, mas com parametros
+	@GetMapping(params = "resumo")
+	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
+	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
+		return this.service.listResume(lancamentoFilter, pageable);
 	}
 	
 	@GetMapping("/{id}")
