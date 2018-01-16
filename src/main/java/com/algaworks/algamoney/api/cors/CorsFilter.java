@@ -11,9 +11,12 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import com.algaworks.algamoney.api.config.AlgamoneyApiConfig;
 
 //indica que e um componente spring
 @Component
@@ -27,13 +30,18 @@ import org.springframework.stereotype.Component;
  *
  */
 public class CorsFilter implements Filter {
-
-	/*Origins permitidas*/
-	private String originPermitida = "http://localhost:8000"; // TODO: Configurar para diferentes ambientes
+	
+	//pegamos nosso arquivo de configuracao
+	@Autowired
+	private AlgamoneyApiConfig config;
+	
 	
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse resp, FilterChain chain)
 			throws IOException, ServletException {
+		
+		//pegamos uma propriedade definida em nosso arquivo de configuracao
+		String originPermitida = config.getOriginPermitida();
 		
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) resp;
