@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -25,11 +24,14 @@ public class AppUserDetailSerrvice implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+		//pegamos o objeto usuario pelo seu email, para depois comparar com a senha
+		//a verificacao de email e senha, eh feita na classe UsuarioSistema que estende de User
 		Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
 		//Java 8, como eh opcional, ele lanca a excecao na hora, eh codigo lambda
 		Usuario usuario = usuarioOptional.orElseThrow(() -> new UsernameNotFoundException("Usuário e/ou senha incorretos"));
-		//eh com esse objeto que o Spring verifica o login e senha
-		return new User(email, usuario.getSenha(), getPermissoes(usuario));
+		//o spring verifica o login e senha com a classe User
+		//aqui criamos um Wrapper, pra que o objetoi contenha mais informacoes
+		return new UsuarioSistema(usuario, getPermissoes(usuario));
 	}
 
 	private Collection<? extends GrantedAuthority> getPermissoes(Usuario usuario) {
