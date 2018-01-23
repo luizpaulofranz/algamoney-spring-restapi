@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.oauth2.config.annotation.configurers.ClientDetailsServiceConfigurer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.AuthorizationServerConfigurerAdapter;
@@ -18,6 +19,10 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import com.algaworks.algamoney.api.config.token.TokenExtraInformation;
 
+//habilita essa classe para controlar a autenticacao quando esse profile estiver ativo
+//na verdade so carrega essa classe quando esse profile estiver ativo
+//as configuracoes de profiles ativos estao nos arquivos de configuracao ".properties"
+@Profile("oauth-security")
 @Configuration
 @EnableAuthorizationServer
 //essa classe eh responsavel pelas autenticacoes dos APLICATIVOS CLIENTES e não dos usuarios 
