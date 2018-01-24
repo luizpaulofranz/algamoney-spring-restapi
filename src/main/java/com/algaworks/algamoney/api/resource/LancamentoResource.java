@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -28,42 +29,44 @@ import com.algaworks.algamoney.api.service.LancamentoService;
 @RestController
 @RequestMapping("/lancamentos")
 public class LancamentoResource {
-	
+
 	@Autowired
 	private LancamentoService service;
-	
+
 	@GetMapping
-	//para implementar a paginacao
+	// para implementar a paginacao
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
-	//controle de nivel de acesso do usuario, primeiro as permissoes do usuario, depois do app cliente
-	public Page<Lancamento> listar(LancamentoFilter filter, Pageable page){
+	// controle de nivel de acesso do usuario, primeiro as permissoes do
+	// usuario, depois do app cliente
+	public Page<Lancamento> listar(LancamentoFilter filter, Pageable page) {
 		return this.service.list(filter, page);
 	}
-	
-	//se colocarmos na URL um ?resumo, esse sera o metodo chamado, e nao o de cima
-	//o nome disso eh PROJECTION, um mesmo endpoint, mas com parametros
+
+	// se colocarmos na URL um ?resumo, esse sera o metodo chamado, e nao o de
+	// cima
+	// o nome disso eh PROJECTION, um mesmo endpoint, mas com parametros
 	@GetMapping(params = "resumo")
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		return this.service.listResume(lancamentoFilter, pageable);
 	}
-	
+
 	@GetMapping("/{id}")
 	@PreAuthorize("hasAuthority('ROLE_PESQUISAR_LANCAMENTO') and #oauth2.hasScope('read')")
-	public ResponseEntity<Lancamento> getById(@PathVariable Long id){
+	public ResponseEntity<Lancamento> getById(@PathVariable Long id) {
 		Lancamento lancamento = service.findOne(id);
 		return ResponseEntity.ok().body(lancamento);
 	}
-	
+
 	@PostMapping
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
-	public ResponseEntity<Lancamento> insert(@Valid @RequestBody Lancamento lancamento){
+	public ResponseEntity<Lancamento> insert(@Valid @RequestBody Lancamento lancamento) {
 		Lancamento saved = service.save(lancamento);
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(saved.getId()).toUri();
 
 		return ResponseEntity.created(uri).body(saved);
 	}
-	
+
 	@DeleteMapping("/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
 	@PreAuthorize("hasAuthority('ROLE_REMOVER_LANCAMENTO') and #oauth2.hasScope('write')")
@@ -71,6 +74,17 @@ public class LancamentoResource {
 		// EmptyResultDataAccessException - 404
 		// tratada no exception Handler
 		service.delete(id);
+	}
+
+	@PutMapping("/{codigo}")
+	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO')")
+	public ResponseEntity<Lancamento> atualizar(@PathVariable Long codigo, @Valid @RequestBody Lancamento lancamento) {
+		try {
+			Lancamento lancamentoSalvo = service.atualizar(codigo, lancamento);
+			return ResponseEntity.ok(lancamentoSalvo);
+		} catch (IllegalArgumentException e) {
+			return ResponseEntity.notFound().build();
+		}
 	}
 
 }
