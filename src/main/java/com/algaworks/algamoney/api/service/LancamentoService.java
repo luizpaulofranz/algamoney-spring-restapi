@@ -66,11 +66,10 @@ public class LancamentoService {
 		if (!lancamento.getPessoa().equals(lancamentoSalvo.getPessoa())) {
 			validarPessoa(lancamento);
 		}
-
 		lancamento.setId(lancamentoSalvo.getId());
 		//BeanUtils.copyProperties(lancamento, lancamentoSalvo, "id");
 
-		return repository.save(lancamentoSalvo);
+		return repository.save(lancamento);
 	}
 
 	private void validarPessoa(Lancamento lancamento) {
