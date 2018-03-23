@@ -33,7 +33,7 @@ public class Pessoa {
 	private Boolean ativo;
 
 	@Transient //para nao inserir isso no banco
-	@JsonIgnore //para nao ir para a API
+	// @JsonIgnore //para nao ir para a API
 	public boolean isAtivo(){
 		return ativo;
 	}
