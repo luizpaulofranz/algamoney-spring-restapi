@@ -40,8 +40,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 			.scopes("read", "write")//esse escopo pode conter qlq array de strings, 
 			//eh usado para controle de nivel de acesso aos metodos
 			.authorizedGrantTypes("password", "refresh_token")//passwordflow do oauth, sao os fluxos do protocolo oauth
-			.accessTokenValiditySeconds(1800)//tempo de vida do token, 30 mins
-			.refreshTokenValiditySeconds(3600 * 24)//poremos dar refresh nesse token por ateh um dia
+			.accessTokenValiditySeconds(1800)//tempo de vida do token, 5 mins
+			.refreshTokenValiditySeconds(3600 * 4)//poremos dar refresh nesse token por ateh 4 hpras
 		.and()
 			//outro aplicativo cliente, com escopo mais limitado
 			.withClient("mobile")
@@ -49,7 +49,7 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
 			.scopes("read")//esse tem escopo apenas de leitura
 			.authorizedGrantTypes("password", "refresh_token")//passwordflow do oauth, sao os fluxos do protocolo oauth
 			.accessTokenValiditySeconds(1800)//tempo de vida do token, 30 mins
-			.refreshTokenValiditySeconds(3600 * 24);//poremos dar refresh nesse token por ateh um dia
+			.refreshTokenValiditySeconds(3600 * 8);//poremos dar refresh nesse token por ateh 8 horas
 		
 	}
 

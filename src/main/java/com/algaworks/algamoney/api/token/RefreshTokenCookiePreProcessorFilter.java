@@ -14,6 +14,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
 import org.apache.catalina.util.ParameterMap;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
@@ -26,6 +27,7 @@ import org.springframework.stereotype.Component;
  * A outra classe do pacote token remove o refresh_token, essa adiciona.
  *
  */
+@Profile("oauth-security")
 @Component
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RefreshTokenCookiePreProcessorFilter implements Filter {
@@ -34,7 +36,6 @@ public class RefreshTokenCookiePreProcessorFilter implements Filter {
 	//intercepta todos os requests da aplicacao
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 			throws IOException, ServletException {
-		
 		HttpServletRequest req = (HttpServletRequest) request;
 		//aqui filtramos os requests, para alterar apenas o request necessario
 		//verificamos a URL, o parametro grant_type e os cookies
