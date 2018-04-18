@@ -1,5 +1,6 @@
 package com.algaworks.algamoney.api.repository.lancamento;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import com.algaworks.algamoney.api.dto.LancamentoCategoria;
 import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
 import com.algaworks.algamoney.api.repository.projection.ResumoLancamento;
@@ -47,7 +49,9 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 	//retorna uma versao resumida do resource lancamento
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
+		//o generics da criteria contem o retorno
 		CriteriaQuery<ResumoLancamento> criteria = builder.createQuery(ResumoLancamento.class);
+		//o generics do root eh o "from" 
 		Root<Lancamento> root = criteria.from(Lancamento.class);
 
 		//damos os gets diretamente nas strings q representam os campos 
@@ -115,6 +119,36 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 
 		criteria.select(builder.count(root));
 		return manager.createQuery(criteria).getSingleResult();
+	}
+
+	@Override
+	public List<LancamentoCategoria> porCategoria(LocalDate mesReferencia) {
+CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
+		
+		CriteriaQuery<LancamentoCategoria> criteriaQuery = criteriaBuilder.
+				createQuery(LancamentoCategoria.class);
+		
+		Root<Lancamento> root = criteriaQuery.from(Lancamento.class);
+		
+		criteriaQuery.select(criteriaBuilder.construct(LancamentoCategoria.class, 
+				root.get("categoria"),
+				criteriaBuilder.sum(root.get("valor"))));
+		
+		LocalDate primeiroDia = mesReferencia.withDayOfMonth(1);
+		LocalDate ultimoDia = mesReferencia.withDayOfMonth(mesReferencia.lengthOfMonth());
+		
+		criteriaQuery.where(
+				criteriaBuilder.greaterThanOrEqualTo(root.get("dataVencimento"), 
+						primeiroDia),
+				criteriaBuilder.lessThanOrEqualTo(root.get("dataVencimento"), 
+						ultimoDia));
+		
+		criteriaQuery.groupBy(root.get("categoria"));
+		
+		TypedQuery<LancamentoCategoria> typedQuery = manager
+				.createQuery(criteriaQuery);
+		
+		return typedQuery.getResultList();
 	}
 
 }

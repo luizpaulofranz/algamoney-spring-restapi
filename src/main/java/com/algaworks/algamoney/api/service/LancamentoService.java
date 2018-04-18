@@ -1,5 +1,8 @@
 package com.algaworks.algamoney.api.service;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -7,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.algaworks.algamoney.api.dto.LancamentoCategoria;
 import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.model.Pessoa;
 import com.algaworks.algamoney.api.repository.LancamentoRepository;
@@ -32,6 +36,10 @@ public class LancamentoService {
 	/* Lista os lancamentos e apresenta um JSON resumido */
 	public Page<ResumoLancamento> listResume(LancamentoFilter filter, Pageable page) {
 		return repository.resumir(filter, page);
+	}
+	
+	public List<LancamentoCategoria> porCategoria(){
+		return this.repository.porCategoria(LocalDate.now());
 	}
 
 	// save and update
