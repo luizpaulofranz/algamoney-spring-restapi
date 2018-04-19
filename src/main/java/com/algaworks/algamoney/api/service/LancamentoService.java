@@ -11,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.algaworks.algamoney.api.dto.LancamentoCategoria;
+import com.algaworks.algamoney.api.dto.LancamentoDia;
 import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.model.Pessoa;
 import com.algaworks.algamoney.api.repository.LancamentoRepository;
@@ -40,6 +41,10 @@ public class LancamentoService {
 	
 	public List<LancamentoCategoria> porCategoria(){
 		return this.repository.porCategoria(LocalDate.now());
+	}
+	
+	public List<LancamentoDia> porDia(){
+		return this.repository.porDia(LocalDate.now());
 	}
 
 	// save and update

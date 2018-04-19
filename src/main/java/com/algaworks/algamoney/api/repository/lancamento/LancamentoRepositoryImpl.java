@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
 import com.algaworks.algamoney.api.dto.LancamentoCategoria;
+import com.algaworks.algamoney.api.dto.LancamentoDia;
 import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
 import com.algaworks.algamoney.api.repository.projection.ResumoLancamento;
@@ -46,18 +47,17 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 	}
 
 	@Override
-	//retorna uma versao resumida do resource lancamento
+	// retorna uma versao resumida do resource lancamento
 	public Page<ResumoLancamento> resumir(LancamentoFilter lancamentoFilter, Pageable pageable) {
 		CriteriaBuilder builder = manager.getCriteriaBuilder();
-		//o generics da criteria contem o retorno
+		// o generics da criteria contem o retorno
 		CriteriaQuery<ResumoLancamento> criteria = builder.createQuery(ResumoLancamento.class);
-		//o generics do root eh o "from" 
+		// o generics do root eh o "from"
 		Root<Lancamento> root = criteria.from(Lancamento.class);
 
-		//damos os gets diretamente nas strings q representam os campos 
-		criteria.select(builder.construct(ResumoLancamento.class, root.get("id"),
-				root.get("descricao"), root.get("dataVencimento"),
-				root.get("dataPagamento"), root.get("valor"), root.get("tipo"),
+		// damos os gets diretamente nas strings q representam os campos
+		criteria.select(builder.construct(ResumoLancamento.class, root.get("id"), root.get("descricao"),
+				root.get("dataVencimento"), root.get("dataPagamento"), root.get("valor"), root.get("tipo"),
 				root.get("categoria").get("nome"), root.get("pessoa").get("nome")));
 
 		Predicate[] predicates = createPredicades(lancamentoFilter, builder, root);
@@ -121,33 +121,54 @@ public class LancamentoRepositoryImpl implements LancamentoRepositoryQuery {
 		return manager.createQuery(criteria).getSingleResult();
 	}
 
+	// para relatorios, Total Lancamentos por Categoria
 	@Override
 	public List<LancamentoCategoria> porCategoria(LocalDate mesReferencia) {
-CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
-		
-		CriteriaQuery<LancamentoCategoria> criteriaQuery = criteriaBuilder.
-				createQuery(LancamentoCategoria.class);
-		
+		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
+
+		CriteriaQuery<LancamentoCategoria> criteriaQuery = criteriaBuilder.createQuery(LancamentoCategoria.class);
+
 		Root<Lancamento> root = criteriaQuery.from(Lancamento.class);
-		
-		criteriaQuery.select(criteriaBuilder.construct(LancamentoCategoria.class, 
-				root.get("categoria"),
+
+		criteriaQuery.select(criteriaBuilder.construct(LancamentoCategoria.class, root.get("categoria"),
 				criteriaBuilder.sum(root.get("valor"))));
-		
+
 		LocalDate primeiroDia = mesReferencia.withDayOfMonth(1);
 		LocalDate ultimoDia = mesReferencia.withDayOfMonth(mesReferencia.lengthOfMonth());
-		
-		criteriaQuery.where(
-				criteriaBuilder.greaterThanOrEqualTo(root.get("dataVencimento"), 
-						primeiroDia),
-				criteriaBuilder.lessThanOrEqualTo(root.get("dataVencimento"), 
-						ultimoDia));
-		
+
+		criteriaQuery.where(criteriaBuilder.greaterThanOrEqualTo(root.get("dataVencimento"), primeiroDia),
+				criteriaBuilder.lessThanOrEqualTo(root.get("dataVencimento"), ultimoDia));
+
 		criteriaQuery.groupBy(root.get("categoria"));
-		
-		TypedQuery<LancamentoCategoria> typedQuery = manager
-				.createQuery(criteriaQuery);
-		
+
+		TypedQuery<LancamentoCategoria> typedQuery = manager.createQuery(criteriaQuery);
+
+		return typedQuery.getResultList();
+	}
+
+	// para relatorios, Total Lancamentos por dia e por tipo RECEITA DESPESA 
+	@Override
+	public List<LancamentoDia> porDia(LocalDate mesReferencia) {
+		CriteriaBuilder criteriaBuilder = manager.getCriteriaBuilder();
+
+		CriteriaQuery<LancamentoDia> criteriaQuery = criteriaBuilder
+				.createQuery(LancamentoDia.class);
+
+		Root<Lancamento> root = criteriaQuery.from(Lancamento.class);
+
+		criteriaQuery.select(criteriaBuilder.construct(LancamentoDia.class, root.get("tipo"),
+				root.get("dataVencimento"), criteriaBuilder.sum(root.get("valor"))));
+
+		LocalDate primeiroDia = mesReferencia.withDayOfMonth(1);
+		LocalDate ultimoDia = mesReferencia.withDayOfMonth(mesReferencia.lengthOfMonth());
+
+		criteriaQuery.where(criteriaBuilder.greaterThanOrEqualTo(root.get("dataVencimento"), primeiroDia),
+				criteriaBuilder.lessThanOrEqualTo(root.get("dataVencimento"), ultimoDia));
+
+		criteriaQuery.groupBy(root.get("tipo"), root.get("dataVencimento"));
+
+		TypedQuery<LancamentoDia> typedQuery = manager.createQuery(criteriaQuery);
+
 		return typedQuery.getResultList();
 	}
 
