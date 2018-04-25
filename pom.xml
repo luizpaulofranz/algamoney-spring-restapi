@@ -22,6 +22,11 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>1.8</java.version>
+		
+		<jasperreports.version>6.5.1</jasperreports.version>
+        <jasperreports-functions.version>6.5.1</jasperreports-functions.version>
+		<jasperreports-fonts.version>6.0.0</jasperreports-fonts.version>
+		
 	</properties>
 
 	<dependencies>
@@ -51,21 +56,20 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-		
-		<!-- Migrations com Flyway em src/main/resources/db/migration
-		atencao para a nomenclatura dos nomes das migrations
-		-->
+
+		<!-- Migrations com Flyway em src/main/resources/db/migration atencao para 
+			a nomenclatura dos nomes das migrations -->
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-core</artifactId>
 		</dependency>
-		
+
 		<!-- Hibernate Java 8 Support -->
 		<dependency>
-    			<groupId>org.hibernate</groupId>
-    			<artifactId>hibernate-java8</artifactId>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-java8</artifactId>
 		</dependency>
-		
+
 		<!-- Suporte do Jackson para as datas do Java 8 -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.datatype</groupId>
@@ -84,12 +88,12 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
 		</dependency>
-		
+
 		<!-- JWT = Json Web Token, pra formular um token fodelao -->
 		<dependency>
 			<groupId>org.springframework.security</groupId>
@@ -106,6 +110,27 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
+
+		<!-- JasperReports -->
+		<!-- ${} isso acessa as properties definidas no topo do pom -->
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports</artifactId>
+			<version>${jasperreports.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-functions</artifactId>
+			<version>${jasperreports-functions.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.jasperreports</groupId>
+			<artifactId>jasperreports-fonts</artifactId>
+			<version>${jasperreports-fonts.version}</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
@@ -116,6 +141,12 @@
 			</plugin>
 		</plugins>
 	</build>
-
+	<!-- Adicionamos o repositorio do Jasper -->
+	<repositories>
+        <repository>
+            <id>jr-ce-releases</id>
+            <url>http://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-releases</url>
+        </repository>
+	</repositories>
 
 </project>
