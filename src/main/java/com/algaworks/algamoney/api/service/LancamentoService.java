@@ -48,7 +48,7 @@ public class LancamentoService {
 		params.put("DT_FIM", Date.valueOf(fim));
 		params.put("REPORT_LOCALE", new Locale("pt", "BR"));
 		// importamos o relatorio jasper
-		InputStream stream = this.getClass().getResourceAsStream("relatorios/lancamentos_pessoa.jasper");
+		InputStream stream = this.getClass().getResourceAsStream("/relatorios/lancamentos_pessoa.jasper");
 		// jasper esta no pom.xml
 		JasperPrint print = JasperFillManager.fillReport(
 				stream, params, 
