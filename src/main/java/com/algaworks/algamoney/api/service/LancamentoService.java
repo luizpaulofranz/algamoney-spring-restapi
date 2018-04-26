@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.algaworks.algamoney.api.dto.LancamentoCategoria;
@@ -39,6 +40,13 @@ public class LancamentoService {
 
 	@Autowired
 	private PessoaRepository pessoas;
+	
+	/*pode ser fixedDelay = 1000 (ms) executa esse metodo a cada 1 segundo, o timer so conta a partir do termino da execucao anterior
+	 "cron" recebe uma expressao cron unix, executada toda 6 hrs da manha */
+	@Scheduled(cron="0 0 6 * * *")
+	public void alertLancamentoVencido() {
+		
+	}
 	
 	public byte[] relatorioPorPessoa(LocalDate inicio, LocalDate fim) throws JRException {
 		List<LancamentoPessoa> dados = repository.porPessoa(inicio, fim);
