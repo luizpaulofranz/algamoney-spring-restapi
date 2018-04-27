@@ -1,7 +1,10 @@
 package com.algaworks.algamoney.api.mail;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
@@ -12,23 +15,56 @@ import org.springframework.context.event.EventListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
+
+import com.algaworks.algamoney.api.model.Lancamento;
+import com.algaworks.algamoney.api.repository.LancamentoRepository;
 
 @Component
 public class Mailer {
 	
 	@Autowired
 	private JavaMailSender sender;
+	@Autowired
+	private TemplateEngine thymeleaf;
 
-//  testando o envio	
-//  ApplicationReadyEvent eh um evento padrao do Spring, em conjunto com a anotacao @EventListner 
-//	podemos criar hooks em pontos do ciclo de vida do spring
-//	@EventListener
-//	private void teste(ApplicationReadyEvent event) {
-//    	this.sendMail("testehue@gmail.com", 
-//				Arrays.asList("luizpaulofranz@gmail.com"), 
-//				"Testando", "Olá!<br/>Teste ok.");
-//		System.out.println("Terminado o envio de e-mail...");
-//	}
+//  testando o envio
+/*	
+	@Autowired
+	private LancamentoRepository repo;
+	@EventListener
+	private void teste(ApplicationReadyEvent event) {
+		String template = "mail/aviso-lancamentos-vencidos";
+		
+		List<Lancamento> lista = repo.findAll();
+		
+		Map<String, Object> variaveis = new HashMap<>();
+		variaveis.put("lancamentos", lista);
+		
+		this.sendMail("testes.algaworks@gmail.com", 
+				Arrays.asList("luizpaulofranz@gmail.com"), 
+				"Testando", template, variaveis);
+		System.out.println("Terminado o envio de e-mail...");
+	}
+*/
+	
+	// alem dos dados basicos, passamos o caminho do template, e um mapa de 
+	// parametros pra dentro do template, nesse caso "lancamentos" com uma lista de lancamentos
+	public void sendMail (
+			String remetente, 
+			List<String> destinatarios, String assunto, String template, 
+			Map<String, Object> variaveis
+	){
+		Context context = new Context(new Locale("pt", "BR"));
+		// lambda para percorrer as variaveis
+		variaveis.entrySet().forEach(
+				e -> context.setVariable(e.getKey(), e.getValue()));
+		
+		String mensagem = thymeleaf.process(template, context);
+		
+		this.sendMail(remetente, destinatarios, assunto, mensagem);
+	}
 	
 	public void sendMail(String remetente, List<String> destinatarios, String assunto, String msg) {
 		try {
