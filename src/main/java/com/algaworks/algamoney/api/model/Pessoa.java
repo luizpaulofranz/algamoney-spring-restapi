@@ -38,12 +38,13 @@ public class Pessoa {
 	@NotNull
 	private Boolean ativo;
 	
-	// com isso ignoramos ESSA classe na lista de contatos
+	// ignora a propriedade pessoa da classe Contato, simples
 	// isso eh necessario pois pessoa aponta para conttato, que aponta para pessoa
 	// gerando um loop infinito
 	@JsonIgnoreProperties("pessoa")
 	@Valid
-	@OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL)
+	// orphan eh usado para remover os registros da base que nao esteja no Json
+	@OneToMany(mappedBy = "pessoa", cascade = CascadeType.ALL, orphanRemoval=true)
 	private List<Contato> contatos;
 
 	@Transient //para nao inserir isso no banco
