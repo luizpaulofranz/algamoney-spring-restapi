@@ -1,17 +1,15 @@
 package com.algaworks.algamoney.api.mail;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.event.EventListener;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -19,7 +17,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import com.algaworks.algamoney.api.model.Lancamento;
-import com.algaworks.algamoney.api.repository.LancamentoRepository;
+import com.algaworks.algamoney.api.model.Usuario;
 
 @Component
 public class Mailer {
@@ -48,6 +46,24 @@ public class Mailer {
 		System.out.println("Terminado o envio de e-mail...");
 	}
 */
+	/**
+	 * Envia os emails de Lancamentos Vencidos
+	 */
+	public void avisarSobreLancamentosVencidos(
+			List<Lancamento> vencidos, List<Usuario> destinatarios) {
+		Map<String, Object> variaveis = new HashMap<>();
+		variaveis.put("lancamentos", vencidos);
+		
+		List<String> emails = destinatarios.stream()
+				.map(u -> u.getEmail())
+				.collect(Collectors.toList());
+		
+		this.sendMail("testes.algaworks@gmail.com", 
+				emails, 
+				"Lançamentos vencidos", 
+				"mail/aviso-lancamentos-vencidos", 
+				variaveis);
+	}
 	
 	// alem dos dados basicos, passamos o caminho do template, e um mapa de 
 	// parametros pra dentro do template, nesse caso "lancamentos" com uma lista de lancamentos

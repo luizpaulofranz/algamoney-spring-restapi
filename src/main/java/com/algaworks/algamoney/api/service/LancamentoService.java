@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
@@ -18,10 +20,13 @@ import org.springframework.stereotype.Service;
 import com.algaworks.algamoney.api.dto.LancamentoCategoria;
 import com.algaworks.algamoney.api.dto.LancamentoDia;
 import com.algaworks.algamoney.api.dto.LancamentoPessoa;
+import com.algaworks.algamoney.api.mail.Mailer;
 import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.model.Pessoa;
+import com.algaworks.algamoney.api.model.Usuario;
 import com.algaworks.algamoney.api.repository.LancamentoRepository;
 import com.algaworks.algamoney.api.repository.PessoaRepository;
+import com.algaworks.algamoney.api.repository.UsuarioRepository;
 import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
 import com.algaworks.algamoney.api.repository.projection.ResumoLancamento;
 import com.algaworks.algamoney.api.service.exception.PessoaInvalidaException;
@@ -34,18 +39,51 @@ import net.sf.jasperreports.engine.data.JRBeanCollectionDataSource;
 
 @Service
 public class LancamentoService {
+	
+	private static final Logger logger = LoggerFactory.getLogger(LancamentoService.class);
 
 	@Autowired
 	private LancamentoRepository repository;
 
 	@Autowired
 	private PessoaRepository pessoas;
+	@Autowired
+	private UsuarioRepository usuarios;
+	@Autowired
+	private Mailer mailer;
+	
+	private static final String DESTINATARIOS = "ROLE_PESQUISAR_LANCAMENTO";
 	
 	/*pode ser fixedDelay = 1000 (ms) executa esse metodo a cada 1 segundo, o timer so conta a partir do termino da execucao anterior
-	 "cron" recebe uma expressao cron unix, executada toda 6 hrs da manha */
+	 "cron" recebe uma expressao cron unix, nesse caso toda 6 hrs da manha 
+	 Entao, toda manha o sistema verifica lancamentos vencidos e alerta os usuarios*/
 	@Scheduled(cron="0 0 6 * * *")
+	//@Scheduled(fixedDelay= 1000 * 10) - nesse caso a cada 10 segundos
 	public void alertLancamentoVencido() {
-		
+		// como eh uma tarefa assincrona, usamos o logger para sabermos quando executou
+		if (logger.isDebugEnabled()) {
+			logger.debug("Preparando envio de "
+					+ "e-mails de aviso de lançamentos vencidos.");
+		}
+		// recuperamos a lista de lancamentos vencida
+		List<Lancamento> vencidos = repository.findByDataVencimentoLessThanEqualAndDataPagamentoIsNull(LocalDate.now());
+		if (vencidos.isEmpty()) {
+			logger.info("Sem lançamentos vencidos para aviso.");
+			return;
+		}
+		logger.info("Exitem {} lançamentos vencidos.", vencidos.size());
+		// recuperamos a lista de usuarios com permissao, para pegar seus emails
+		List<Usuario> destinatarios = usuarios.findByPermissoesDescricao(
+				DESTINATARIOS
+				);
+		if (destinatarios.isEmpty()) {
+			logger.warn("Existem lançamentos vencidos, mas o "
+					+ "sistema não encontrou destinatários.");
+			
+			return;
+		}
+		mailer.avisarSobreLancamentosVencidos(vencidos, destinatarios);
+		logger.info("Envio de e-mail de aviso concluído.");
 	}
 	
 	public byte[] relatorioPorPessoa(LocalDate inicio, LocalDate fim) throws JRException {
