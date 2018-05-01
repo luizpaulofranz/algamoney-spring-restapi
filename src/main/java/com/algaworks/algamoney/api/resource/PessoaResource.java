@@ -49,7 +49,7 @@ public class PessoaResource {
 	@PostMapping
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_PESSOA') and #oauth2.hasScope('write')")
 	public ResponseEntity<Pessoa> criar(@Valid @RequestBody Pessoa pessoa) {
-		Pessoa pes = pessoaRepository.save(pessoa);
+		Pessoa pes = service.salvar(pessoa);
 
 		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(pes.getId()).toUri();
 

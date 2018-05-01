@@ -25,7 +25,15 @@ public class PessoaService {
 		return pessoa;
 	}
 	
+	public Pessoa salvar(Pessoa pessoa) {
+		// isso associa os Contato com a Pessoa, ja que o mapeamento Json eliminou essa parte
+		pessoa.getContatos().forEach(c -> c.setPessoa(pessoa));
+		return this.pessoas.save(pessoa);
+	}
+	
 	public void update(Pessoa pessoa) {
+		// isso associa os Contato com a Pessoa, ja que o mapeamento Json eliminou essa parte
+		pessoa.getContatos().forEach(c -> c.setPessoa(pessoa));
 		verificarExistencia(pessoa);
 		pessoas.save(pessoa);
 	}
