@@ -16,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import com.algaworks.algamoney.api.dto.LancamentoCategoria;
 import com.algaworks.algamoney.api.dto.LancamentoDia;
@@ -30,6 +31,7 @@ import com.algaworks.algamoney.api.repository.UsuarioRepository;
 import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
 import com.algaworks.algamoney.api.repository.projection.ResumoLancamento;
 import com.algaworks.algamoney.api.service.exception.PessoaInvalidaException;
+import com.algaworks.algamoney.api.storage.S3;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperExportManager;
@@ -51,6 +53,8 @@ public class LancamentoService {
 	private UsuarioRepository usuarios;
 	@Autowired
 	private Mailer mailer;
+	@Autowired
+	private S3 s3;
 	
 	private static final String DESTINATARIOS = "ROLE_PESQUISAR_LANCAMENTO";
 	
@@ -132,6 +136,11 @@ public class LancamentoService {
 			// verificar se o lancamento existe
 			findOne(lancamento.getId());
 		}
+		// o arquivo deve ter sido enviado antes de vincular ele a um lancamento
+		if(StringUtils.hasText(lancamento.getAnexo())) {
+			s3.salvar(lancamento.getAnexo());
+		}
+		
 		return repository.save(lancamento);
 	}
 
@@ -156,6 +165,14 @@ public class LancamentoService {
 		lancamento.setId(lancamentoSalvo.getId());
 		//BeanUtils.copyProperties(lancamento, lancamentoSalvo, "id");
 
+		// se nao tem anexo no request e tem na base, devemos excluir do S3
+		if(StringUtils.isEmpty(lancamento.getAnexo()) && StringUtils.hasText(lancamentoSalvo.getAnexo())){
+			s3.remover(lancamento.getAnexo());
+		// se tiver um arquivo e ele for diferente do atual
+		} else if(StringUtils.hasLength(lancamento.getAnexo()) && !lancamento.getAnexo().equals(lancamentoSalvo.getAnexo())){
+			s3.substituir(lancamentoSalvo.getAnexo(),lancamento.getAnexo());
+		}
+		
 		return repository.save(lancamento);
 	}
 

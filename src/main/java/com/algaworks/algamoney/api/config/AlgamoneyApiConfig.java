@@ -123,6 +123,16 @@ public class AlgamoneyApiConfig {
 			private String accessKeyId;
 			
 			private String secretAccessKey;
+			
+			private String bucket = "lpf-algamoney";
+			
+			public String getBucket() {
+				return this.bucket;
+			}
+			
+			public void setBucket(String bucket) {
+				this.bucket = bucket;
+			}
 	
 			public String getAccessKeyId() {
 				return accessKeyId;

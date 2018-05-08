@@ -31,12 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import com.algaworks.algamoney.api.dto.Anexo;
 import com.algaworks.algamoney.api.dto.LancamentoCategoria;
 import com.algaworks.algamoney.api.dto.LancamentoDia;
 import com.algaworks.algamoney.api.model.Lancamento;
 import com.algaworks.algamoney.api.repository.filter.LancamentoFilter;
 import com.algaworks.algamoney.api.repository.projection.ResumoLancamento;
 import com.algaworks.algamoney.api.service.LancamentoService;
+import com.algaworks.algamoney.api.storage.S3;
 
 @RestController
 @RequestMapping("/lancamentos")
@@ -45,17 +47,19 @@ public class LancamentoResource {
 	@Autowired
 	private LancamentoService service;
 	
+	@Autowired
+	private S3 s3;
+	
 	/**
 	 * Esse metodo controla o Upload de Arquivos, o request deve ser um multi-part form.
+	 * Salva o arquivo em um bucket do S3
 	 * */
 	@PostMapping("/anexo")
 	@PreAuthorize("hasAuthority('ROLE_CADASTRAR_LANCAMENTO') and #oauth2.hasScope('write')")
-	public String uploadAnexo(@RequestParam MultipartFile anexo) throws IOException {
-		OutputStream out = new FileOutputStream(
-				"/home/alexandre/Desktop/anexo--" + anexo.getOriginalFilename());
-		out.write(anexo.getBytes());
-		out.close();
-		return "ok";
+	public Anexo uploadAnexo(@RequestParam MultipartFile anexo) throws IOException {
+		String nome = s3.salvarTemporariamente(anexo);
+		// apenas retorna o nome e a URL do arquivo
+		return new Anexo(nome, s3.configurarUrl(nome));
 	}
 	
 	@GetMapping("/relatorios/por-pessoa")
@@ -63,9 +67,7 @@ public class LancamentoResource {
 	public ResponseEntity<byte[]> relatorioPorPessoa(
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate inicio, 
 			@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate fim) throws Exception {
-		System.out.println("Entrou");
 		byte[] relatorio = service.relatorioPorPessoa(inicio, fim);
-		System.out.println("Hue");
 		return ResponseEntity.ok()
 				.header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_PDF_VALUE)
 				.body(relatorio);
