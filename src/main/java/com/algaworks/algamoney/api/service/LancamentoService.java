@@ -167,7 +167,7 @@ public class LancamentoService {
 
 		// se nao tem anexo no request e tem na base, devemos excluir do S3
 		if(StringUtils.isEmpty(lancamento.getAnexo()) && StringUtils.hasText(lancamentoSalvo.getAnexo())){
-			s3.remover(lancamento.getAnexo());
+			s3.remover(lancamentoSalvo.getAnexo());
 		// se tiver um arquivo e ele for diferente do atual
 		} else if(StringUtils.hasLength(lancamento.getAnexo()) && !lancamento.getAnexo().equals(lancamentoSalvo.getAnexo())){
 			s3.substituir(lancamentoSalvo.getAnexo(),lancamento.getAnexo());
