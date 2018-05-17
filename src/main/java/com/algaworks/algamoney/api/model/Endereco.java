@@ -1,6 +1,8 @@
 package com.algaworks.algamoney.api.model;
 
 import javax.persistence.Embeddable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 @Embeddable
 //essa anotacao permite "inserir" essa classe nem outras classes
@@ -12,8 +14,11 @@ public class Endereco {
 	private String complemento;
 	private String bairro;
 	private String cep;
-	private String cidade;
-	private String estado;
+	
+	@ManyToOne
+	@JoinColumn(name = "id_cidade")
+	private Cidade cidade;
+	
 	public String getLogradouro() {
 		return logradouro;
 	}
@@ -43,19 +48,12 @@ public class Endereco {
 	}
 	public void setCep(String cep) {
 		this.cep = cep;
+	}	
+	public Cidade getCidade() {
+		return this.cidade;
 	}
-	public String getCidade() {
-		return cidade;
-	}
-	public void setCidade(String cidade) {
+	public void setCidade(Cidade cidade) {
 		this.cidade = cidade;
 	}
-	public String getEstado() {
-		return estado;
-	}
-	public void setEstado(String estado) {
-		this.estado = estado;
-	}
-	
 	
 }
